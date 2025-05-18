@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Encryption Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Encryption Tool</h1>
+    <input type="file" id="imageInput" accept="image/*" />
+    <canvas id="canvas" width="50" height="50"></canvas>
+    <button id="encryptButton">Encrypt (Swap RB)</button>
+    <button id="decryptButton">Decrypt (Swap RB)</button>
+    <button id="addButton">Add 50 to each pixel</button>
+    <button id="subtractButton">Subtract 50 from each pixel</button>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let imageData;
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const image = new Image();
+                image.onload = () => {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    ctx.drawImage(image, 0, 0);
+                    imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                };
+                image.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('encryptButton').addEventListener('click', () => {
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const temp = imageData.data[i];
+                imageData.data[i] = imageData.data[i + 2]; // Blue
+                imageData.data[i + 2] = temp; // Red
+            }
+            ctx.putImageData(imageData, 0, 0);
+        });
+
+        document.getElementById('decryptButton').addEventListener('click', () => {
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const temp = imageData.data[i];
+                imageData.data[i] = imageData.data[i + 2]; // Blue
+                imageData.data[i + 2] = temp; // Red
+            }
+            ctx.putImageData(imageData, 0, 0);
+        });
+
+        document.getElementById('addButton').addEventListener('click', () => {
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = Math.min(255, imageData.data[i] + 50); // Red
+                imageData.data[i + 1] = Math.min(255, imageData.data[i + 1] + 50); // Green
+                imageData.data[i + 2] = Math.min(255, imageData.data[i + 2] + 50); // Blue
+            }
+            ctx.putImageData(imageData, 0, 0);
+        });
+
+        document.getElementById('subtractButton').addEventListener('click', () => {
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = Math.max(0, imageData.data[i] - 50); // Red
+                imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] - 50); // Green
+                imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] - 50); // Blue
+            }
+            ctx.putImageData(imageData, 0, 0);
+        });
+    </script>
+</body>
+</html>
+
+
